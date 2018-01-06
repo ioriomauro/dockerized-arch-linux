@@ -1,0 +1,3 @@
+docker image used to build aur packages. 
+
+Usage: cower-build pkg1 pkg2 ... pkgN
