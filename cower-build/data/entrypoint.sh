@@ -3,6 +3,7 @@ set -ue
 
 ARGS="$@"
 
+pacman -Syy --noconfirm
 su - developer -c "/home/developer/build-pkgs.sh ${ARGS}"
 
 find /home/developer -iname "*.pkg.tar.xz" -exec cp {} /packages/ \;
