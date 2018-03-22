@@ -1,8 +1,0 @@
-To build a fresh arch-linux image just run "build.sh"
-The new image will be found in "data/arch-strap.latest.tar"
-You can then import it in docker to test using
-    - docker import `readlink data/arch-strap.latest.tar` ioriomauro/arch-strap-test
-    - docker run --rm -ti ioriomauro/arch-strap-test /bin/bash
-Once satisfied, You can compress the archive, tag and push the image wherever You want,
-and clean You docker db with
-    - docker rmi $(docker images -q -f dangling=true)

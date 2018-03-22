@@ -1,43 +1,28 @@
 #!/bin/bash
-# § http://kilabit.info/journal/2015/11/Building_Docker_Image_with_Arch_Linux
-set -ue
+set -uex
 
-BASE=$(dirname $(readlink -f "$0"))
-TMPDIR=$(mktemp -p "$BASE"/data -d)
-TMPFILE=$(mktemp -p "$BASE"/data)
-PACCFG=$(mktemp -p "$BASE"/data)
-IMGNAME="data/arch-strap.$(date -u +"%Y-%m-%dT%H-%M-%S").tar"
-LATESTNAME="data/arch-strap.latest.tar"
-# Minimum packages: pacman
-# Some other packages (e.g.: git) fail to install without:
-#   - chsh (from util-linux)
-#   - systemd-sysusers (from systemd)
-#PKGS="coreutils pacman pacman-mirrorlist sed gzip"
-PKGS="pacman util-linux systemd sed gzip"
-REALUID=$(id -ru)
-REALGID=$(id -rg)
+# User variables
+MIRROR=${MIRROR:-"https://mirror.f4st.host/archlinux"}
 
 function atexit() {
-    if [ "$(findmnt "$TMPDIR")" != "" ]; then
-        sudo umount "$TMPDIR"
-    fi
-    if [ -d "$TMPDIR" ]; then
-        sudo rm -rf "$TMPDIR"
-    fi
-    if [ -f "$TMPFILE" ]; then
-        rm "$TMPFILE"
-    fi
-    if [ -f "$PACCFG" ]; then
-        rm "$PACCFG"
-    fi
-    popd >/dev/null 2>/dev/null
+    popd >/dev/null
 }
 trap atexit EXIT
 
-pushd "$BASE" >/dev/null 2>/dev/null
+BASE=$(dirname $(readlink -f "$0"))
+pushd "$BASE" >/dev/null
 
-cp /etc/pacman.conf "$PACCFG"
-cat <<EOF >>"$PACCFG"
+PKGS="pacman sed gzip"
+ARCHSTRAP_DIST="/tmp/dist"
+ARCH_IMAGEFILE="/opt/arch-strap.tar"
+LOCAL_DIST=$(readlink -f $(pwd)/dist)
+REALUID=$(id -ru)
+REALGID=$(id -rg)
+
+# docker stop arch-strap-builder || true
+# docker rm arch-strap-builder || true
+
+CONFIG="
 [options]
 NoExtract   = usr/share/doc/*
 NoExtract   = usr/share/help/*
@@ -50,34 +35,40 @@ NoExtract   = usr/share/man/*
 NoExtract   = usr/share/zoneinfo/* !usr/share/zoneinfo/UTC
 NoExtract   = usr/share/vim/vim74/lang/* usr/share/licenses*
 NoExtract   = usr/bin/modprobed_db
-NoExtract   = etc/pacman.d/mirrorlist
-EOF
+"
 
-# Start here
-cat <<EOF | sudo /bin/bash -s
-set -ue
-mount -t tmpfs tmpfs "$TMPDIR"
+docker run --rm -ti \
+           --privileged=true \
+           --name arch-strap-builder \
+           -v ${LOCAL_DIST}:/opt \
+           -e REALUID=${REALUID} \
+           -e REALGID=${REALGID} \
+           ioriomauro/arch-iso:latest \
+           /bin/bash -c "
+set -ux -- && \
+export PACCFG=$(mktemp) && \
+cp /etc/pacman.conf \${PACCFG} && \
+echo \"${CONFIG}\" >>\${PACCFG} && \
+mkdir -p ${ARCHSTRAP_DIST} && \
+pacstrap -cGM -C \${PACCFG} ${ARCHSTRAP_DIST} ${PKGS} && \
+arch-chroot ${ARCHSTRAP_DIST} /usr/bin/sh -c '
+    set -ux -- && \
+    ln -nfs /usr/share/zoneinfo/UTC /etc/localtime && \
+    echo \"en_US.UTF-8 UTF-8\" > /etc/locale.gen && \
+    echo \"LANG=en_US.UTF-8\" >/etc/locale.conf && \
+    echo \"Server = ${MIRROR}/\\\$repo/os/\\\$arch\" >/etc/pacman.d/mirrorlist && \
+    echo \"${CONFIG}\" >>/etc/pacman.conf && \
+    locale-gen && \
+    echo -e \"Arch Linux\nBuild time: $(LANG=en_US date -u)\" > /RELEASE
+' && \
+echo \"Creating tar archive. This may take a while...\" && \
+pacman --noconfirm -S tar && \
+tar --numeric-owner --warning=no-file-ignored --xattrs --acls -C ${ARCHSTRAP_DIST} -acf ${ARCH_IMAGEFILE} . && \
+ls -l /opt && \
+chown ${REALUID}:${REALGID} ${ARCH_IMAGEFILE}
+"
 
-# Bootstrap arch-linux
-pacstrap -c -C "$PACCFG" -d "$TMPDIR" $PKGS
-
-# Set hostname, zoneinfo and locale
-echo "arch-strap" > "$TMPDIR"/etc/hostname
-if [ ! -f "$TMPDIR"/etc/localtime ]; then
-    cp -f "$TMPDIR"/usr/share/zoneinfo/UTC "$TMPDIR"/etc/localtime
-fi
-echo "en_US.UTF-8 UTF-8" > "$TMPDIR"/etc/locale.gen
-arch-chroot "$TMPDIR" /usr/bin/sh -c "/usr/bin/locale-gen; /usr/bin/pacman -Rs --noconfirm sed gzip"
-
-# Create the tar archive
-echo "Creating tar archive. This may take a while..."
-tar --numeric-owner --warning=no-file-ignored --xattrs --acls -C "$TMPDIR" -cf "$TMPFILE" .
-
-mv "$TMPFILE" "$IMGNAME"
-chown $REALUID:$REALGID "$IMGNAME"
-
-umount "$TMPDIR"
-
-EOF
-
-ln -sf "$IMGNAME" "$LATESTNAME"
+# Now that we have an image file we can build a real docker image
+docker build -t ioriomauro/arch-base:$(LANG=en_US date +%Y.%m.%d) \
+             -t ioriomauro/arch-base:latest \
+             .
