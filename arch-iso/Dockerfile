@@ -32,8 +32,7 @@ RUN set -x -- && \
     echo "Server = ${MIRROR}/\$repo/os/\$arch" >/etc/pacman.d/mirrorlist && \
     pacman --noconfirm -Syy && \
     pacman --noconfirm -S --needed sed gzip && \
-    locale-gen && \
-    echo -e "Arch Linux ${ISO_VER}\nBuild time: $(LANG=en_US date -u)" > /RELEASE
+    locale-gen
 
 # Some cleanup
 RUN pacman --noconfirm -Rs systemd && \
@@ -44,3 +43,6 @@ ADD entrypoint.sh /
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD [ "/usr/bin/bash", "-l"]
+
+RUN set -ux && \
+    echo -e "Arch Linux ${ISO_VER}\nBuild time: $(LANG=en_US date -u)" > /RELEASE
