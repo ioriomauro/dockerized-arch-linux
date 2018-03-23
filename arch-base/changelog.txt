@@ -1,0 +1,17 @@
+-------------------------------------------------------------------------------
+RELEASE 2 - 2018-03-23
+-------------------------------------------------------------------------------
+Rewritten using a docker container which run pacstrap to prepare the new image.
+After thorough testing I decided to install-and-remove systemd and it's
+dependencies in order to create system groups and users. See notes in
+Dockerfile.
+This new image is smaller than the previous but still bigger than a dockerized
+CentOS 7 (for what it's worth).
+
+
+
+-------------------------------------------------------------------------------
+RELEASE 1 - 2018-01-06
+-------------------------------------------------------------------------------
+First image version.
+Based on an article found at http://kilabit.info/journal/2015/11/Building_Docker_Image_with_Arch_Linux
