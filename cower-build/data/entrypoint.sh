@@ -3,8 +3,8 @@ set -ue
 
 ARGS="$@"
 
-pacman -Syy --noconfirm
-su - developer -c "/home/developer/build-pkgs.sh ${ARGS}"
+sudo pacman -Syy --noconfirm
+/usr/bin/bash -l /home/developer/build-pkgs.sh ${ARGS}
 
-find /home/developer -iname "*.pkg.tar.xz" -exec cp {} /packages/ \;
-chown ${UID}:${GID} /packages/*.pkg.tar.xz
+find /home/developer -iname "*.pkg.tar.xz" -exec sudo cp -v {} /packages/ \;
+sudo chown ${UID}:${GID} /packages/*.pkg.tar.xz
