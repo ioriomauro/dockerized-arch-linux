@@ -1,4 +1,12 @@
 -------------------------------------------------------------------------------
+RELEASE 3 - 2018-05-17
+-------------------------------------------------------------------------------
+Maintaining Arch Linux evolution:
+    - adding missing locale dependency: usr/share/i18n/locales/i18n_ctype
+
+
+
+-------------------------------------------------------------------------------
 RELEASE 2 - 2018-03-23
 -------------------------------------------------------------------------------
 Rewritten using a docker container which run pacstrap to prepare the new image.

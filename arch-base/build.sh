@@ -12,7 +12,7 @@ trap atexit EXIT
 BASE=$(dirname $(readlink -f "$0"))
 pushd "$BASE" >/dev/null
 
-RELNUM=2
+RELNUM=3
 PKGS="pacman sed gzip"
 ARCHSTRAP_DIST="/tmp/dist"
 ARCH_IMAGEFILE="/opt/arch-strap.tar"
@@ -25,7 +25,7 @@ CONFIG="
 NoExtract   = usr/share/doc/*
 NoExtract   = usr/share/help/*
 NoExtract   = usr/share/gtk-doc/*
-NoExtract   = usr/share/i18n/* !usr/share/i18n/locales/en_US !usr/share/i18n/locales/en_GB !usr/share/i18n/locales/i18n !usr/share/i18n/locales/iso14651_* !usr/share/i18n/locales/translit_* !usr/share/i18n/charmaps/UTF-8.gz
+NoExtract   = usr/share/i18n/* !usr/share/i18n/locales/en_US !usr/share/i18n/locales/en_GB !usr/share/i18n/locales/i18n !usr/share/i18n/locales/i18n_ctype !usr/share/i18n/locales/iso14651_* !usr/share/i18n/locales/translit_* !usr/share/i18n/charmaps/UTF-8.gz
 NoExtract   = usr/share/iana-etc/*
 NoExtract   = usr/share/locale/* !usr/share/locale/en_US/* !usr/share/locale/locale.alias
 NoExtract   = usr/share/info/*
@@ -82,6 +82,8 @@ docker build -t ioriomauro/arch-base:$(LANG=en_US date +%Y.%m.%d) \
 
     docker run --rm -ti ioriomauro/arch-base:latest /usr/bin/bash -c "
         set -ux -- && \
+        cat /RELEASE && \
+        cat /CHANGELOG && \
         pacman --noconfirm -S shadow sudo util-linux && \
         useradd -m -G wheel -s /bin/bash developer && \
         echo '%wheel ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/developer && \
