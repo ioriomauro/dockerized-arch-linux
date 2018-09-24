@@ -21,12 +21,12 @@ docker build -t ioriomauro/arch-cower-build:latest .
     echo "*************************************"
     echo -e "\n\n\n"
 
+    test_pkgs=(tmuxinator libcurl-openssl-1.0 perl pacaur)
     docker run  --rm -ti \
                 -e UID=`id -ru` \
                 -e GID=`id -rg` \
+                -e DEBUG=1 \
+                -e IGNORE_PACMAN_MIRRORS=0 \
                 ioriomauro/arch-cower-build:latest \
-                    tmuxinator \
-                    libcurl-openssl-1.0 \
-                    perl \
-                    pacaur
+                    ${test_pkgs[@]}
 )
