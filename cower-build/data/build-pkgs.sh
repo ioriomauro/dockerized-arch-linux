@@ -1,6 +1,11 @@
 #!/bin/bash
 set -u
 
+DEBUG=${DEBUG:-0}
+if [ "$DEBUG" -eq "1" ]; then
+    set -x
+fi
+
 # SYNOPSIS: build-pkgs.sh pkg1 pkg2 ... pkgN
 #           pkg1..N are exact names of aur packages. Names can be searched
 #           with "cower -s" and the filtered
@@ -24,18 +29,18 @@ function exists_in {
 
 
 function get_deps {
-    for d in $(egrep '^depends=' "$1"/PKGBUILD | \
-               sed -e 's/depends=(\(.*\))/\1/g' | \
-               tr -d "'\""); do
+    for d in $(source "$1"/PKGBUILD; \
+               set +u --; \
+               echo ${depends[@]}); do
         exists_in $d "${deps[@]}"
         if [ $? -eq 1 ]; then
             deps+=($d)
         fi
     done
 
-    for d in $(egrep '^makedepends=' "$1"/PKGBUILD | \
-               sed -e 's/makedepends=(\(.*\))/\1/g' | \
-               tr -d "'\""); do
+    for d in $(source "$1"/PKGBUILD; \
+               set +u --; \
+               echo ${makedepends[@]}); do
         exists_in $d "${makedeps[@]}"
         if [ $? -eq 1 ]; then
             makedeps+=($d)
