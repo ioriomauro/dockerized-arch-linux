@@ -1,0 +1,9 @@
+#!/bin/bash
+set -ue
+
+docker run --rm -i \
+    -e UID=`id -ru` \
+    -e GID=`id -rg` \
+    -v /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro \
+    -v /var/lib/pacman:/var/lib/pacman:ro \
+    ioriomauro/arch-cower:latest "$@"

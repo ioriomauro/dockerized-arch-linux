@@ -1,0 +1,18 @@
+#!/bin/bash
+set -ue
+
+DEBUG=${DEBUG:-0}
+
+# NOTE: If You plan to bind mount read-only Your own version of /etc/pacman.d/mirrorlist,
+#       please define IGNORE_PACMAN_MIRRORS=1 or bind mount read-write; otherwise You'll
+#       get errors when "pacman -Syyu" tries to update pacman-mirrorlist package.
+
+mkdir -p ~/aur-pkgs
+docker run --rm -i \
+    -e UID=`id -ru` \
+    -e GID=`id -rg` \
+    -e DEBUG=$DEBUG \
+    -e IGNORE_PACMAN_MIRRORS=1 \
+    -v ~/aur-pkgs:/packages \
+    -v /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro \
+    ioriomauro/arch-cower-build:latest "$@"
