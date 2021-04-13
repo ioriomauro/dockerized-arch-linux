@@ -13,9 +13,9 @@ RUN set -x -- && \
 # users. This step is needed if You plan to use system groups (e.g.: wheel).
 # Systemd is not needed for any other reasons (so far) in a docker image (nor
 # in a chroot enviromnent) and then can be removed.
-RUN set -x -- && \
-    pacman --noconfirm -S systemd && \
-    pacman --noconfirm -Rs systemd
+#RUN set -x -- && \
+#    pacman --noconfirm -S systemd && \
+#    pacman --noconfirm -Rs systemd
 
 # Some cleanup
 RUN yes | pacman -Scc

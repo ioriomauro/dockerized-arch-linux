@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ue
+set -uex
 
 function atexit() {
     popd >/dev/null
@@ -9,9 +9,10 @@ trap atexit EXIT
 BASE=$(dirname $(readlink -f "0"))
 pushd "$BASE" >/dev/null
 
-VER=$(date +%Y.%m.01)
+VER=${VER:-$(date +%Y.%m.01)}
 
 docker build --build-arg ISO_VER=${VER} \
+             --build-arg MIRROR=${MIRROR:-"https://mirror.f4st.host/archlinux"} \
              -t ioriomauro/arch-iso:${VER} \
              -t ioriomauro/arch-iso:latest \
              .

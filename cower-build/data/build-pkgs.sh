@@ -29,7 +29,8 @@ function exists_in {
 
 
 function get_deps {
-    for d in $(source "$1"/PKGBUILD; \
+    for d in $(export CARCH=""; \
+               source "$1"/*/PKGBUILD; \
                set +u --; \
                echo ${depends[@]}); do
         exists_in $d "${deps[@]}"
@@ -38,7 +39,8 @@ function get_deps {
         fi
     done
 
-    for d in $(source "$1"/PKGBUILD; \
+    for d in $(export CARCH=""; \
+               source "$1"/*/PKGBUILD; \
                set +u --; \
                echo ${makedepends[@]}); do
         exists_in $d "${makedeps[@]}"
@@ -58,7 +60,8 @@ function download {
         return 0
     fi
 
-    cower -dv "${1}"
+    mkdir "${1}"
+    cower -dv --target "${1}" "${1}"
     if [ $? -ne 0 ]; then
         echo "${1} in official repo"
         exists_in ${1} "${arch_deps[@]}"
@@ -79,7 +82,7 @@ function download {
 
 
 function build_aur {
-    pushd ${1}
+    pushd ${1}/*
 
     makepkg -i --skippgpcheck --noconfirm
 

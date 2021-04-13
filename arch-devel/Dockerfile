@@ -13,7 +13,7 @@ RUN set -x -- && \
 
 # Some cleanup
 RUN set -x -- && \
-    pacman -Rs --noconfirm systemd && \
+    echo pacman -Rs --noconfirm systemd && \
     yes | pacman -Scc
 
 ADD data/sudoers.d/ /etc/sudoers.d/

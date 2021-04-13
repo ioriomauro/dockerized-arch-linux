@@ -5,8 +5,8 @@ RUN apk --no-cache add curl
 ARG MIRROR="https://mirror.f4st.host/archlinux"
 ARG ISO_VER
 
-RUN mkdir /opt && \
-    cd /opt && \
+RUN mkdir -p /opt/arch && \
+    cd /opt/arch && \
     curl -LO "${MIRROR}/iso/${ISO_VER}/archlinux-bootstrap-${ISO_VER}-x86_64.tar.gz" && \
     curl -L "${MIRROR}/iso/${ISO_VER}/sha1sums.txt" | grep ".tar.gz" > sha1sums.txt && \
     sha1sum -c sha1sums.txt && \
@@ -18,7 +18,7 @@ FROM scratch
 
 LABEL maintainer="Mauro Iorio <iorio.mauro@gmail.com>"
 
-COPY --from=builder /opt/root.x86_64/ /
+COPY --from=builder /opt/arch/root.x86_64/ /
 
 ARG MIRROR="https://mirror.f4st.host/archlinux"
 ARG ISO_VER
@@ -34,9 +34,9 @@ RUN set -x -- && \
     pacman --noconfirm -S --needed sed gzip && \
     locale-gen
 
-# Some cleanup
-RUN pacman --noconfirm -Rs systemd && \
-    yes | pacman -Scc
+# Some cleanup (Note: broken as of 2019-05-02)
+#RUN pacman --noconfirm -Rs systemd && \
+#    yes | pacman -Scc
 
 ADD entrypoint.sh /
 
