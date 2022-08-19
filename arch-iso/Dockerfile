@@ -8,10 +8,9 @@ ARG ISO_VER
 RUN mkdir -p /opt/arch && \
     cd /opt/arch && \
     curl -LO "${MIRROR}/iso/${ISO_VER}/archlinux-bootstrap-${ISO_VER}-x86_64.tar.gz" && \
-    curl -L "${MIRROR}/iso/${ISO_VER}/sha1sums.txt" | grep ".tar.gz" > sha1sums.txt && \
+    curl -L "${MIRROR}/iso/${ISO_VER}/sha1sums.txt" | grep "archlinux-bootstrap-${ISO_VER}-x86_64.tar.gz" > sha1sums.txt && \
     sha1sum -c sha1sums.txt && \
     tar xf "archlinux-bootstrap-${ISO_VER}-x86_64.tar.gz"
-
 
 
 FROM scratch
