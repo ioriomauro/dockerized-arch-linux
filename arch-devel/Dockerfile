@@ -1,4 +1,4 @@
-FROM ioriomauro/arch-base:latest
+FROM ioriomauro/arch-iso:latest
 
 LABEL maintainer="Mauro Iorio <iorio.mauro@gmail.com>"
 
