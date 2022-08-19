@@ -37,22 +37,23 @@ docker build -t ioriomauro/arch-devel:latest \
         cd && \
         echo \"${SRC}\" >test.c && \
         gcc -Wall -o test test.c && ./test && \
-        curl -LO 'https://curl.haxx.se/download/curl-7.59.0.tar.gz' && \
-        sha1sum curl-7.59.0.tar.gz > sha1sums.txt && \
-        tar xf curl-7.59.0.tar.gz && \
-        cd curl-7.59.0 && \
+        curl -LO 'https://curl.se/download/curl-7.84.0.tar.gz' && \
+        sha1sum curl-7.84.0.tar.gz > sha1sums.txt && \
+        tar xf curl-7.84.0.tar.gz && \
+        cd curl-7.84.0 && \
         ./configure \
             --prefix=/usr/local             \
             --with-random=/dev/urandom      \
             --enable-static                 \
             --enable-threaded-resolver      \
             --with-ca-path=/etc/ssl/certs   \
-            --enable-ipv6 && \
+            --enable-ipv6 \
+            --with-openssl && \
         make && sudo make install && \
         cd .. && \
         /usr/local/bin/curl -V && \
-        rm -f curl-7.59.0.tar.gz && \
-        /usr/local/bin/curl -LO 'https://curl.haxx.se/download/curl-7.59.0.tar.gz' && \
+        rm -f curl-7.84.0.tar.gz && \
+        /usr/local/bin/curl -LO 'https://curl.se/download/curl-7.84.0.tar.gz' && \
         sha1sum -c sha1sums.txt
     "
 )
